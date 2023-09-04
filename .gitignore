@@ -1,12 +1,9 @@
 .DS_Store
 node_modules
 .turbo
-*.log
 dist
 dist-ssr
 *.local
-.env
-.cache
 server/dist
 public/dist
 
@@ -114,7 +111,6 @@ dist
 
 # vuepress v2.x temp and cache directory
 .temp
-.cache
 
 # Docusaurus cache and generated files
 .docusaurus
