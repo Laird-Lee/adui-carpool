@@ -13,10 +13,10 @@ services:
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
       MYSQL_DATABASE: ${DATABASE_NAME}
     ports:
-      - "9003:3306"
+      - ${DOCKER_DATABASE_PORT}:3306
 
   adminer:
     image: adminer
     restart: always
     ports:
-      - "9004:8080"
+      - ${DOCKER_ADMINER_PORT}:8080
