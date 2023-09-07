@@ -4,11 +4,14 @@ import { AppService } from './app.service';
 import { SentryInterceptor, SentryModule } from '@ntegral/nestjs-sentry';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { TypeormConfigService } from './database/typeorm-config.service';
 import appConfig from './config/app.config';
 import authConfig from './config/auth.config';
 import databaseConfig from './config/database.config';
 import fileConfig from './config/file.config';
 import mailConfig from './config/mail.config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 
 @Module({
   imports: [
@@ -24,6 +27,12 @@ import mailConfig from './config/mail.config';
       release: 'some_release', // must create a release in sentry.io dashboard
       logLevels: ['debug'], //based on sentry.io loglevel //
     }),
+    TypeOrmModule.forRootAsync({
+      useClass: TypeormConfigService,
+      dataSourceFactory: async (options: DataSourceOptions) => {
+        return new DataSource(options).initialize();
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [
@@ -35,11 +44,12 @@ import mailConfig from './config/mail.config';
           filters: [
             {
               type: HttpException,
-              filter: (exception: HttpException) => 200 > exception.getStatus(), // Only report 500 errors
+              filter: (exception: HttpException) => 500 > exception.getStatus(), // Only report 500 errors
             },
           ],
         }),
     },
+    TypeormConfigService,
   ],
 })
 export class AppModule {}
