@@ -56,10 +56,16 @@ export type MailConfig = {
   requireTLS: boolean;
 };
 
+export type SentryConfig = {
+  dsn: string;
+  environment?: string;
+};
+
 export type AllConfigType = {
   app: AppConfig;
   auth: AuthConfig;
   database: DatabaseConfig;
   file: FileConfig;
   mail: MailConfig;
+  sentry: SentryConfig;
 };

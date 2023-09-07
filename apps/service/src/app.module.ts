@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SentryInterceptor, SentryModule } from '@ntegral/nestjs-sentry';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeormConfigService } from './database/typeorm-config.service';
 import appConfig from './config/app.config';
 import authConfig from './config/auth.config';
@@ -12,20 +12,61 @@ import fileConfig from './config/file.config';
 import mailConfig from './config/mail.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import { AllConfigType } from './config/common/config.type';
+import sentryConfig from './config/sentry.config';
+import { HeaderResolver, I18nModule } from 'nestjs-i18n';
+import * as path from 'path';
+
+const envFilePath = `.env.${process.env.NODE_ENV}`;
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, databaseConfig, fileConfig, mailConfig],
-      envFilePath: ['.env'],
+      load: [
+        appConfig,
+        authConfig,
+        databaseConfig,
+        fileConfig,
+        mailConfig,
+        sentryConfig,
+      ],
+      envFilePath: [envFilePath],
     }),
-    SentryModule.forRoot({
-      dsn: 'https://893262f51e867f452e6ab86cf2c884ab@o985795.ingest.sentry.io/4505831510179840',
-      debug: true,
-      environment: 'dev',
-      release: 'some_release', // must create a release in sentry.io dashboard
-      logLevels: ['debug'], //based on sentry.io loglevel //
+    SentryModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService<AllConfigType>) => ({
+        dsn: configService.getOrThrow('sentry.dsn', { infer: true }),
+        environment: configService.getOrThrow('sentry.environment', {
+          infer: true,
+        }),
+        release: 'some_release', // must create a release in sentry.io dashboard
+        logLevels: ['debug'], //based on sentry.io loglevel //
+      }),
+      inject: [ConfigService],
+    }),
+    I18nModule.forRootAsync({
+      useFactory: (configService: ConfigService<AllConfigType>) => ({
+        fallbackLanguage: configService.getOrThrow('app.fallbackLanguage', {
+          infer: true,
+        }),
+        loaderOptions: { path: path.join(__dirname, '/i18n/'), watch: true },
+      }),
+      resolvers: [
+        {
+          use: HeaderResolver,
+          useFactory: (configService: ConfigService<AllConfigType>) => {
+            return [
+              configService.get('app.headerLanguage', {
+                infer: true,
+              }),
+            ];
+          },
+          inject: [ConfigService],
+        },
+      ],
+      imports: [ConfigModule],
+      inject: [ConfigService],
     }),
     TypeOrmModule.forRootAsync({
       useClass: TypeormConfigService,
