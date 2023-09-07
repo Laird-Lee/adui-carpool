@@ -10,11 +10,13 @@ import {
 } from '@nestjs/common';
 import validationOptions from './utils/validation-options';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as os from 'os';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   const configService = app.get(ConfigService<AllConfigType>);
+  const hostname = os.hostname();
 
   app.enableShutdownHooks();
   app.setGlobalPrefix(
@@ -37,8 +39,31 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('api-docs', app, document);
 
   await app.listen(configService.getOrThrow('app.port', { infer: true }));
+
+  console.log(`
+           _____        _    _____                             _
+     /\\   |  __ \\      (_)  / ____|                           | |
+    /  \\  | |  | |_   _ _  | |     __ _ _ __ _ __   ___   ___ | |
+   / /\\ \\ | |  | | | | | | | |    / _\` | '__| '_ \\ / _ \\ / _ \\| |
+  / ____ \\| |__| | |_| | | | |___| (_| | |  | |_) | (_) | (_) | |
+ /_/    \\_|_____/ \\__,_|_|  \\_____\\__,_|_|  | .__/ \\___/ \\___/|_|
+                                            | |
+                                            |_|
+`);
+
+  console.log(`
+      Api running at: http://${hostname}:${configService.getOrThrow(
+    'app.port',
+    { infer: true },
+  )}/${configService.getOrThrow('app.apiPrefix', { infer: true })}
+
+      Swagger running at: http://${hostname}:${configService.getOrThrow(
+    'app.port',
+    { infer: true },
+  )}/api-docs
+  `);
 }
 void bootstrap();

@@ -15,6 +15,8 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { AllConfigType } from './config/common/config.type';
 import sentryConfig from './config/sentry.config';
 import { HeaderResolver, I18nModule } from 'nestjs-i18n';
+import { UsersModule } from './users/users.module';
+import { RolesModule } from './roles/roles.module';
 import * as path from 'path';
 
 const envFilePath = `.env.${process.env.NODE_ENV}`;
@@ -74,6 +76,8 @@ const envFilePath = `.env.${process.env.NODE_ENV}`;
         return new DataSource(options).initialize();
       },
     }),
+    UsersModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [
