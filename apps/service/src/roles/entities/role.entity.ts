@@ -32,7 +32,7 @@ export class Role {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => User, (user) => user.roles)
+  @ManyToMany(() => User, (user) => user.role)
   @JoinTable({
     name: 'pub_user_roles',
     joinColumn: { name: 'userId' },

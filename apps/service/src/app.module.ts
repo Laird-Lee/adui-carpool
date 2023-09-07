@@ -1,6 +1,4 @@
 import { HttpException, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { SentryInterceptor, SentryModule } from '@ntegral/nestjs-sentry';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -17,6 +15,8 @@ import sentryConfig from './config/sentry.config';
 import { HeaderResolver, I18nModule } from 'nestjs-i18n';
 import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
+import { AuthModule } from './auth/auth.module';
+import { SessionModule } from './session/session.module';
 import * as path from 'path';
 
 const envFilePath = `.env.${process.env.NODE_ENV}`;
@@ -76,12 +76,13 @@ const envFilePath = `.env.${process.env.NODE_ENV}`;
         return new DataSource(options).initialize();
       },
     }),
+    AuthModule,
     UsersModule,
     RolesModule,
+    SessionModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [
-    AppService,
     {
       provide: APP_INTERCEPTOR,
       useFactory: () =>

@@ -4,6 +4,7 @@ export type AppConfig = {
   workingDirectory: string;
   frontendDomain?: string;
   backendDomain: string;
+  host: string;
   port: number;
   apiPrefix: string;
   fallbackLanguage: string;
@@ -11,9 +12,9 @@ export type AppConfig = {
 };
 
 export type AuthConfig = {
-  secret?: string;
+  secret: string;
   expires?: string;
-  refreshSecret?: string;
+  refreshSecret: string;
   refreshExpires?: string;
 };
 

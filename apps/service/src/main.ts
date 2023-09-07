@@ -17,6 +17,7 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   const configService = app.get(ConfigService<AllConfigType>);
   const hostname = os.hostname();
+  console.log(os);
 
   app.enableShutdownHooks();
   app.setGlobalPrefix(
@@ -55,15 +56,15 @@ async function bootstrap() {
 `);
 
   console.log(`
-      Api running at: http://${hostname}:${configService.getOrThrow(
-    'app.port',
-    { infer: true },
-  )}/${configService.getOrThrow('app.apiPrefix', { infer: true })}
+      Api running at: ${configService.getOrThrow('app.host', {
+        infer: true,
+      })}:${configService.getOrThrow('app.port', {
+    infer: true,
+  })}/${configService.getOrThrow('app.apiPrefix', { infer: true })}
 
-      Swagger running at: http://${hostname}:${configService.getOrThrow(
-    'app.port',
-    { infer: true },
-  )}/api-docs
+      Swagger running at: ${configService.getOrThrow('app.host', {
+        infer: true,
+      })}:${configService.getOrThrow('app.port', { infer: true })}/api-docs
   `);
 }
 void bootstrap();
