@@ -18,8 +18,8 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  login(@Body() accountLoginDto: AccountLoginDto) {
-    return this.authService.login(accountLoginDto);
+  async login(@Body() accountLoginDto: AccountLoginDto) {
+    return await this.authService.login(accountLoginDto);
   }
 
   @Get('logout')
@@ -28,7 +28,7 @@ export class AuthController {
   }
 
   @Post('register')
-  register(@Body() createUserDto: CreateUserDto) {
-    return this.authService.register(createUserDto);
+  async register(@Body() createUserDto: CreateUserDto) {
+    return await this.authService.register(createUserDto);
   }
 }

@@ -27,7 +27,9 @@ export class SessionService {
   }
 
   async create(data: DeepPartial<Session>): Promise<Session> {
-    return this.sessionRepository.save(this.sessionRepository.create(data));
+    return await this.sessionRepository.save(
+      this.sessionRepository.create(data),
+    );
   }
 
   async softDelete({

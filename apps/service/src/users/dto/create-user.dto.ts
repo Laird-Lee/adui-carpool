@@ -15,10 +15,10 @@ export class CreateUserDto {
   password: string;
 
   @ApiProperty({ example: 'test1@example.com' })
-  @Transform(lowerCaseTransformer)
-  @Validate(IsNotExist, ['User'], {
-    message: 'emailAlreadyExists',
-  })
-  @IsEmail()
+  // @Transform(lowerCaseTransformer)
+  // @Validate(IsNotExist, ['User'], {
+  //   message: 'emailAlreadyExists',
+  // })
+  // @IsEmail()
   email?: string | null;
 }

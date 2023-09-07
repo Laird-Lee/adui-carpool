@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class UsersService {
@@ -12,8 +13,17 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto) {
+    const user = await this.userRepository.findOneBy({
+      username: createUserDto.username,
+      email: createUserDto.email,
+    });
+    if (user) {
+      throw new InternalServerErrorException();
+    }
+    const userTmp = this.userRepository.create({ ...createUserDto });
+    userTmp.password = await argon2.hash(userTmp.password);
+    return await this.userRepository.save(userTmp);
   }
 
   findAll() {

@@ -8,9 +8,10 @@ import {
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Role } from '../../roles/entities/role.entity';
+import { EntityHelper } from '../../utils/entity-helper';
 
 @Entity('pub_user')
-export class User {
+export class User extends EntityHelper {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -78,5 +79,5 @@ export class User {
   updatedAt: Date;
 
   @ManyToMany(() => Role, (role) => role.users)
-  role: Role[];
+  roles: Role[];
 }
