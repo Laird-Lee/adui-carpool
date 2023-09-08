@@ -13,6 +13,7 @@ import { User } from '../users/entities/user.entity';
 import { Session } from '../session/entities/session.entity';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import ms from 'ms';
 
 @Injectable()
 export class AuthService {
@@ -40,15 +41,16 @@ export class AuthService {
     }
 
     const session = await this.sessionService.create({ user });
-    const { token, refreshToken } = await this.getTokensData({
+    const { token, refreshToken, tokenExpires } = await this.getTokensData({
       id: user.id,
-      role: user.role,
+      roles: user.roles,
       sessionId: session.id,
     });
 
     return {
       refreshToken,
       token,
+      tokenExpires,
       user,
     };
   }
@@ -65,21 +67,25 @@ export class AuthService {
 
   private async getTokensData(data: {
     id: User['id'];
-    role: User['role'];
+    roles: User['roles'];
     sessionId: Session['id'];
   }) {
+    const tokenExpiresIn = this.configService.getOrThrow('auth.expires', {
+      infer: true,
+    });
+
+    const tokenExpires = Date.now() + ms(tokenExpiresIn);
+
     const [token, refreshToken] = await Promise.all([
       await this.jwtService.signAsync(
         {
           id: data.id,
-          role: data.role,
+          role: data.roles ? data.roles.join(',') : '',
           sessionId: data.sessionId,
         },
         {
           secret: this.configService.get('auth.secret', { infer: true }),
-          expiresIn: this.configService.getOrThrow('auth.expires', {
-            infer: true,
-          }),
+          expiresIn: tokenExpiresIn,
         },
       ),
       await this.jwtService.signAsync(
@@ -98,6 +104,7 @@ export class AuthService {
     return {
       token,
       refreshToken,
+      tokenExpires,
     };
   }
 }

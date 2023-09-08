@@ -9,6 +9,7 @@ import {
 import { Exclude } from 'class-transformer';
 import { Role } from '../../roles/entities/role.entity';
 import { EntityHelper } from '../../utils/entity-helper';
+import moment from 'moment';
 
 @Entity('pub_user')
 export class User extends EntityHelper {
@@ -72,10 +73,28 @@ export class User extends EntityHelper {
   @Exclude({ toPlainOnly: true })
   delFlag: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    transformer: {
+      to(value: any): any {
+        return value;
+      },
+      from(value: any): any {
+        return moment(value).format('YYYY-MM-DD HH:mm:ss');
+      },
+    },
+  })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({
+    transformer: {
+      to(value: any): any {
+        return value;
+      },
+      from(value: any): any {
+        return moment(value).format('YYYY-MM-DD HH:mm:ss');
+      },
+    },
+  })
   updatedAt: Date;
 
   @ManyToMany(() => Role, (role) => role.users)
