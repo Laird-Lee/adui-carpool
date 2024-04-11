@@ -1,10 +1,10 @@
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
   Post,
+  Request,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AccountLoginDto } from './dto/account-login.dto';
@@ -22,13 +22,22 @@ export class AuthController {
     return await this.authService.login(accountLoginDto);
   }
 
-  @Get('logout')
-  logout() {
-    return this.authService.logout();
+  @Post('logout')
+  async logout(@Request() request) {
+    await this.authService.logout({
+      sessionId: request.user.sessionId,
+    });
   }
 
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
     return await this.authService.register(createUserDto);
+  }
+
+  @Post('refresh')
+  async refresh(@Request() request) {
+    return await this.authService.refreshToken({
+      sessionId: request.user.sessionId,
+    });
   }
 }

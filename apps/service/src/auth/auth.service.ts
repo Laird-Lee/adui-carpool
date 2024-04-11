@@ -14,6 +14,8 @@ import { Session } from '../session/entities/session.entity';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import ms from 'ms';
+import { JwtRefreshPayloadType } from './strategies/types/jwt-refresh-payload.type';
+import { LoginResponseType } from './types/login-response.type';
 
 @Injectable()
 export class AuthService {
@@ -54,8 +56,37 @@ export class AuthService {
       user,
     };
   }
-  async logout() {
-    return 'logout';
+
+  async refreshToken(
+    data: Pick<JwtRefreshPayloadType, 'sessionId'>,
+  ): Promise<Omit<LoginResponseType, 'user'>> {
+    const session = await this.sessionService.findOne({
+      where: {
+        id: data.sessionId,
+      },
+    });
+
+    if (!session) {
+      throw new UnauthorizedException();
+    }
+
+    const { token, refreshToken, tokenExpires } = await this.getTokensData({
+      id: session.user.id,
+      roles: session.user.roles,
+      sessionId: session.id,
+    });
+
+    return {
+      refreshToken,
+      token,
+      tokenExpires: +tokenExpires,
+    };
+  }
+
+  async logout(data: Pick<JwtRefreshPayloadType, 'sessionId'>) {
+    return this.sessionService.softDelete({
+      id: data.sessionId,
+    });
   }
   async register(createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
